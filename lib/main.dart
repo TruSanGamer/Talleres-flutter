@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'my_home_page.dart';
+import 'counter_view.dart';
+import 'heavy_task_view.dart';
+import 'student_list_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +21,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(),
+      routes: {
+        '/students': (_) => const StudentListView(),
+        '/counter': (_) => const CounterView(),
+        '/heavy': (_) => const HeavyTaskView(),
+      },
     );
   }
 }
