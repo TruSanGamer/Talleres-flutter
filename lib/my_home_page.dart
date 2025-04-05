@@ -1,144 +1,162 @@
 import 'package:flutter/material.dart';
 import 'form_view.dart';
+import 'joke_list_view.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomeViewState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  bool _isSwitched = false;
+class _MyHomeViewState extends State<MyHomePage> with TickerProviderStateMixin {
+  late final TabController _controller = TabController(length: 3, vsync: this);
+  bool _isActive = false;
+  double _sliderValue = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this); // Cambiado a 3 tabs
-    print("🟢 initState() de MyHomePage"); // Se ejecuta al iniciar el widget
+    debugPrint("🟢 initState() ejecutado");
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print("🔵 didChangeDependencies() de MyHomePage"); // Cambian dependencias
+    debugPrint("🔵 didChangeDependencies() ejecutado");
   }
 
   @override
   Widget build(BuildContext context) {
-    print("🟡 build() de MyHomePage"); // Se reconstruye la UI
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Pantalla Principal"),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: "Lista"),
-            Tab(text: "Opciones"),
-            Tab(text: "Info"), // Nuevo tab
+    debugPrint("🟡 build() ejecutado");
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Página de Inicio"),
+          bottom: TabBar(
+            controller: _controller,
+            tabs: const [
+              Tab(icon: Icon(Icons.grid_view), text: "Elementos"),
+              Tab(icon: Icon(Icons.tune), text: "Configuración"),
+              Tab(icon: Icon(Icons.navigation), text: "Ir a Vistas"),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _controller,
+          children: [
+            _buildElementGrid(),
+            _buildSettings(),
+            _buildNavigationPanel(),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // ✅ 1. GridView con elementos (Lista)
-          GridView.builder(
-            padding: const EdgeInsets.all(10),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // 2 columnas
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  print("➡ Navegando a FormView con Elemento $index");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              FormView(textoInicial: "Elemento $index"),
-                    ),
-                  );
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "Elemento $index",
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-              );
-            },
-          ),
-
-          // ✅ 2. Switch como segundo widget
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Activar opción:", style: TextStyle(fontSize: 18)),
-              Switch(
-                value: _isSwitched,
-                onChanged: (value) {
-                  setState(() {
-                    _isSwitched = value;
-                    print("⚡ setState() de MyHomePage - Cambio en Switch");
-                  });
-                },
-              ),
-              Text(
-                _isSwitched ? "Opción activada" : "Opción desactivada",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-
-          // ✅ 3. Nuevo Widget: ExpansionTile
-          ListView(
-            children: const [
-              ExpansionTile(
-                title: Text("Información General"),
-                children: [
-                  ListTile(title: Text("Este proyecto está hecho en Flutter.")),
-                  ListTile(title: Text("Utiliza Tabs y navegación con rutas.")),
-                ],
-              ),
-              ExpansionTile(
-                title: Text("Créditos"),
-                children: [
-                  ListTile(title: Text("Desarrollado por: Tu Nombre")),
-                  ListTile(title: Text("Versión: 1.0.0")),
-                ],
-              ),
-              ExpansionTile(
-                title: Text("Soporte"),
-                children: [
-                  ListTile(title: Text("Contacto: soporte@ejemplo.com")),
-                ],
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
 
+  Widget _buildElementGrid() => GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: 6,
+        itemBuilder: (_, index) => GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FormView(textoInicial: "Elemento $index"),
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.teal,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              "Elemento $index",
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildSettings() => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Activar opción:", style: TextStyle(fontSize: 18)),
+              Switch(
+                value: _isActive,
+                onChanged: (val) => setState(() => _isActive = val),
+              ),
+              const SizedBox(height: 10),
+              Text(_isActive ? "Activo" : "Inactivo"),
+              const SizedBox(height: 30),
+              const Text("Valor del Slider:", style: TextStyle(fontSize: 18)),
+              Slider(
+                value: _sliderValue,
+                min: 0,
+                max: 100,
+                divisions: 10,
+                label: _sliderValue.round().toString(),
+                onChanged: (val) => setState(() => _sliderValue = val),
+              ),
+              Text("Valor actual: ${_sliderValue.round()}",
+                  style: const TextStyle(fontSize: 16)),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildNavigationPanel() => ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          ElevatedButton.icon(
+            icon: const Icon(Icons.people),
+            label: const Text("Ver Estudiantes"),
+            onPressed: () => Navigator.pushNamed(context, '/students'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.timer),
+            label: const Text("Contador"),
+            onPressed: () => Navigator.pushNamed(context, '/counter'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.memory),
+            label: const Text("Tarea Pesada"),
+            onPressed: () => Navigator.pushNamed(context, '/heavy'),
+          ),
+          ElevatedButton.icon(
+  icon: const Icon(Icons.sentiment_very_satisfied),
+  label: const Text("Chistes de Chuck Norris"),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const JokeListView()),
+    );
+  },
+),
+
+        ],
+        
+      );
+
   @override
   void dispose() {
-    _tabController.dispose();
-    print("🔴 dispose() de MyHomePage"); // Al cerrar el widget
+    _controller.dispose();
+    debugPrint("🔴 dispose() ejecutado");
     super.dispose();
   }
 }
