@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'form_view.dart';
 import 'joke_list_view.dart';
+import 'auth_service.dart';
+import 'login_view.dart';
+import 'user_list_view.dart';
+import 'establishment_list_view.dart';
+
+
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -34,6 +41,22 @@ class _MyHomeViewState extends State<MyHomePage> with TickerProviderStateMixin {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Página de Inicio"),
+          actions: [
+  IconButton(
+    icon: const Icon(Icons.logout),
+    tooltip: 'Cerrar sesión',
+    onPressed: () async {
+      await AuthService.logout();
+      if (!context.mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginView()),
+        (route) => false,
+      );
+    },
+  ),
+],
+
           bottom: TabBar(
             controller: _controller,
             tabs: const [
@@ -138,6 +161,28 @@ class _MyHomeViewState extends State<MyHomePage> with TickerProviderStateMixin {
             label: const Text("Tarea Pesada"),
             onPressed: () => Navigator.pushNamed(context, '/heavy'),
           ),
+          ElevatedButton.icon(
+  icon: const Icon(Icons.location_city),
+  label: const Text("Establecimientos"),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const EstablishmentListView()),
+    );
+  },
+),
+
+          ElevatedButton.icon(
+  icon: const Icon(Icons.people_alt),
+  label: const Text("Gestión de Usuarios"),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const UserListView()),
+    );
+  },
+),
+
           ElevatedButton.icon(
   icon: const Icon(Icons.sentiment_very_satisfied),
   label: const Text("Chistes de Chuck Norris"),
